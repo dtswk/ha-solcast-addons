@@ -1,0 +1,22 @@
+#Content for the Flex-Table-Card, add card to dashboard and copy this text
+type: custom:flex-table-card
+entities:
+  include: sensor.solcast_7day_summary
+title: Solar Forecast
+columns:
+  - name: Day
+    data: summary
+    modify: x.Day
+    align: center
+  - data: summary
+    name: Worst kWh
+    modify: x.pv10
+    align: center
+  - data: summary
+    name: Estimated kWh
+    modify: x.pv
+    align: center
+css:
+  table+: 'border-collapse: collapse;'
+  th+: 'border: 1px solid white;'
+  td+: 'border: 1px solid white;'
