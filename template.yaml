@@ -1,0 +1,106 @@
+- sensor:
+  - name: "solcast_pv_forecast_p10_remaining_today"
+    unique_id: "solcast_pv_forecast_p10_remaining_today"
+    unit_of_measurement: "kWh"
+    icon: mdi:solar-power
+    state: >
+      {% set data = state_attr('sensor.solcast_pv_forecast_forecast_today', 'detailedHourly') %}
+      {% set result = data | map(attribute='period_start') | list %}
+      {% set combined = data | map(attribute='pv_estimate10') | list %}
+      {% set time_now = as_timestamp(now()) %}
+        {% set ns = namespace(result=0) %}
+          {% for item in data %}
+            {% if as_timestamp(item.period_start) > as_timestamp(now()) %}
+              {% set ns.result = ns.result + item.pv_estimate10 | float %}
+            {% endif %}
+          {% endfor %}
+      {% set state = ns.result %}
+      {{ state | round(1) }}
+      
+  - name: "solcast_pv_forecast_p10_forecast_today"
+    unique_id: "solcast_pv_forecast_p10_forecast_today"
+    unit_of_measurement: "kWh"
+    icon: mdi:solar-power
+    state: >      
+      {% set data = state_attr('sensor.solcast_pv_forecast_forecast_today', 'detailedHourly') %}
+      {{ data | map(attribute='pv_estimate10') | sum | round(1) }}
+
+  - name: "solcast_pv_forecast_p10_tomorrow"
+    unique_id: "solcast_pv_forecast_p10_tomorrow"
+    unit_of_measurement: "kWh"
+    icon: mdi:solar-power
+    state: >      
+      {% set data = state_attr('sensor.solcast_pv_forecast_forecast_tomorrow', 'detailedHourly') %}
+      {{ data | map(attribute='pv_estimate10') | sum | round(1) }}
+
+  - name: "solcast_pv_forecast_p10_day_3"
+    unique_id: "solcast_pv_forecast_p10_day_3"
+    unit_of_measurement: "kWh"
+    icon: mdi:solar-power
+    state: >      
+      {% set data = state_attr('sensor.solcast_pv_forecast_forecast_day_3', 'detailedHourly') %}
+      {{ data | map(attribute='pv_estimate10') | sum | round(1) }}
+      
+  - name: "solcast_pv_forecast_p10_day_4"
+    unique_id: "solcast_pv_forecast_p10_day_4"
+    unit_of_measurement: "kWh"
+    icon: mdi:solar-power
+    state: >      
+      {% set data = state_attr('sensor.solcast_pv_forecast_forecast_day_4', 'detailedHourly') %}
+      {{ data | map(attribute='pv_estimate10') | sum | round(1) }}
+      
+  - name: "solcast_pv_forecast_p10_day_5"
+    unique_id: "solcast_pv_forecast_p10_day_5"
+    unit_of_measurement: "kWh"
+    icon: mdi:solar-power
+    state: >      
+      {% set data = state_attr('sensor.solcast_pv_forecast_forecast_day_5', 'detailedHourly') %}
+      {{ data | map(attribute='pv_estimate10') | sum | round(1) }}
+      
+  - name: "solcast_pv_forecast_p10_day_6"
+    unique_id: "solcast_pv_forecast_p10_day_6"
+    unit_of_measurement: "kWh"
+    icon: mdi:solar-power
+    state: >      
+      {% set data = state_attr('sensor.solcast_pv_forecast_forecast_day_6', 'detailedHourly') %}
+      {{ data | map(attribute='pv_estimate10') | sum | round(1) }}      
+      
+  - name: "solcast_pv_forecast_p10_day_7"
+    unique_id: "solcast_pv_forecast_p10_day_7"
+    unit_of_measurement: "kWh"
+    icon: mdi:solar-power
+    state: >      
+      {% set data = state_attr('sensor.solcast_pv_forecast_forecast_day_7', 'detailedHourly') %}
+      {{ data | map(attribute='pv_estimate10') | sum | round(1) }}
+
+#This is used for the flex-table-card dashboard
+  - name: "solcast_7day_summary"
+    device_class: enum
+    state: standby
+    attributes:
+      summary: >
+        {% set d1 = states.sensor.solcast_pv_forecast_forecast_remaining_today.state | float | round(1) %}
+        {% set d2 = states.sensor.solcast_pv_forecast_forecast_tomorrow.state | float | round(1) %}
+        {% set d3 = states.sensor.solcast_pv_forecast_forecast_day_3.state | float | round(1) %}
+        {% set d4 = states.sensor.solcast_pv_forecast_forecast_day_4.state | float | round(1) %}
+        {% set d5 = states.sensor.solcast_pv_forecast_forecast_day_5.state | float | round(1) %}
+        {% set d6 = states.sensor.solcast_pv_forecast_forecast_day_6.state | float | round(1) %}
+        {% set d7 = states.sensor.solcast_pv_forecast_forecast_day_7.state | float | round(1) %}
+        {% set p10_d1 = states.sensor.solcast_pv_forecast_p10_remaining_today.state | float | round(1) %}
+        {% set p10_d2 = states.sensor.solcast_pv_forecast_p10_tomorrow.state | float | round(1) %}
+        {% set p10_d3 = states.sensor.solcast_pv_forecast_p10_day_3.state | float | round(1) %}
+        {% set p10_d4 = states.sensor.solcast_pv_forecast_p10_day_4.state | float | round(1) %}
+        {% set p10_d5 = states.sensor.solcast_pv_forecast_p10_day_5.state | float | round(1) %}
+        {% set p10_d6 = states.sensor.solcast_pv_forecast_p10_day_6.state | float | round(1) %}
+        {% set p10_d7 = states.sensor.solcast_pv_forecast_p10_day_7.state | float | round(1) %}
+        {% set ns = namespace(items=[]) %}
+        {% set ns.state = 0 %}    
+        {% set ns.day = ['Today Remaining', 'Tomorrow', 'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Day 7'] %}     
+        {% set ns.pv = [d1,d2,d3,d4,d5,d6,d7] %}
+        {% set ns.p10_pv = [p10_d1,p10_d2,p10_d3,p10_d4,p10_d5,p10_d6,p10_d7] %}
+        [
+        {% for x in range(0, 7) %}
+          { 'Day': "{{ ns.day[x] }}", 'pv': {{ ns.pv[x] }}, 'pv10': {{ ns.p10_pv[x] }}}
+          {% if not loop.last %},{% endif %}
+        {% endfor%}
+        ]
